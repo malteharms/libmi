@@ -1,5 +1,6 @@
 mod crypto;
 
+use crypto::curve;
 use jni::{
     objects::{JByteArray, JClass, JString},
     JNIEnv,
@@ -76,10 +77,8 @@ pub extern "system" fn Java_de_malteharms_libmi_Native_generateKeyPair<'local>(
     _: JClass<'local>,
 ) -> JByteArray<'local> {
     
-    // ... (perform keypair generation)
-    
-    let buf = [1; 2000];
-    let output = env.byte_array_from_slice(&buf).unwrap();
+    let keypair: [u8; 64] = curve::generate_key_pair();
+    let output = env.byte_array_from_slice(&keypair).unwrap();
     
     output
 }
@@ -92,13 +91,11 @@ pub extern "system" fn Java_de_malteharms_libmi_Native_calculateECDHE<'local>(
     ourPrivateKey: JByteArray<'local>,
     theirPublicKey: JByteArray<'local>
 ) -> JByteArray<'local> {
-    let _opk = env.convert_byte_array(&ourPrivateKey).unwrap();
-    let _tpk = env.convert_byte_array(&theirPublicKey).unwrap();
+    let opk = env.convert_byte_array(&ourPrivateKey).unwrap();
+    let tpk = env.convert_byte_array(&theirPublicKey).unwrap();
     
-    // ... (perform decryption)
-    
-    let buf = [1; 2000];
-    let output = env.byte_array_from_slice(&buf).unwrap();
+    let sk: [u8; 32] = curve::calculate_agreement(opk, tpk);
+    let output = env.byte_array_from_slice(&sk).unwrap();
     
     output
 }
